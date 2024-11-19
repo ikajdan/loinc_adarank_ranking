@@ -1,0 +1,3 @@
+[submodule "adarank_lib"]
+	path = adarank_lib
+	url = https://github.com/rueycheng/AdaRank
