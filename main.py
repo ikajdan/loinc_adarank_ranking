@@ -3,18 +3,25 @@ import re
 import string as st
 import sys
 
+import matplotlib.pyplot as plt
 import nltk
 import numpy as np
 import pandas as pd
+import seaborn as sns
 import tabulate
 from nltk import PorterStemmer, WordNetLemmatizer
 from sklearn.datasets import dump_svmlight_file, load_svmlight_file
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 sys.path.insert(0, os.path.abspath("adarank_lib"))
+# pylint: disable=wrong-import-position
 from adarank_lib.adarank import AdaRank
 from adarank_lib.metrics import NDCGScorer
 from adarank_lib.utils import group_offsets, load_docno
+
+DATA_FILE = "loinc_dataset.xlsx"
+OUTPUT_DIR = "out"
+RANKING_FILE = os.path.join(OUTPUT_DIR, "ranking.txt")
 
 
 def download_nltk_resources():
@@ -57,7 +64,7 @@ def get_train_test_df(df):
 
 
 def df_to_svmlight_files(df, output_dir):
-    main = os.path.join(output_dir, "main_no_ids.dat")
+    main_file = os.path.join(output_dir, "main_no_ids.dat")
     train_file = os.path.join(output_dir, "train_no_ids.dat")
     test_file = os.path.join(output_dir, "test_no_ids.dat")
 
@@ -77,13 +84,13 @@ def df_to_svmlight_files(df, output_dir):
     qid_test = test_df["qid"].to_numpy()
     y_test = test_df["relevance"].to_numpy() + 1
 
-    dump_svmlight_file(x, y, main, query_id=qid)
+    dump_svmlight_file(x, y, main_file, query_id=qid)
     dump_svmlight_file(x_train, y_train, train_file, query_id=qid_train)
     dump_svmlight_file(x_test, y_test, test_file, query_id=qid_test)
 
     out_file, out_train_file, out_test_file = add_ids(
         df["id"].tolist(),
-        main,
+        main_file,
         train_df["id"].tolist(),
         train_file,
         test_df["id"].tolist(),
@@ -118,10 +125,25 @@ def add_ids(ids, file, train_ids, train_file, test_ids, test_file, output_dir):
             output_file, "w", encoding="utf-8"
         ) as fout:
             for index, line in enumerate(fin):
-                id = ids_list[index] if index < len(ids_list) else ""
-                fout.write(f"{line.strip()} #{id}\n")
+                docno = ids_list[index] if index < len(ids_list) else ""
+                fout.write(f"{line.strip()} #{docno}\n")
 
     return tuple(file_info[2] for file_info in output_files.values())
+
+
+def plot_ndcg_scores(y_test, pred, qid_test, k_values=(1, 2, 3, 4, 5, 10, 20)):
+    scores = {k: NDCGScorer(k=k)(y_test, pred, qid_test).mean() for k in k_values}
+
+    df = pd.DataFrame(list(scores.items()), columns=["k", "NDCG Score"])
+
+    sns.lineplot(data=df, x="k", y="NDCG Score", marker="o", color="b")
+
+    plt.xlabel("k")
+    plt.ylabel("NDCG Score")
+    plt.title("NDCG Scores vs Cutoff")
+
+    plt.grid(True)
+    plt.show()
 
 
 def print_ranking(qid, docno, pred, output=None):
@@ -136,12 +158,8 @@ def print_ranking(qid, docno, pred, output=None):
     output.write(tabulate.tabulate(table, headers, tablefmt="pretty"))
 
 
-OUTPUT_DIR = "./out"
-RANKING_OUTPUT_FILE = "./out/ranking.txt"
-DATA_FILE = "loinc_dataset.xlsx"
-
-
 def main():
+    # pylint: disable=unbalanced-tuple-unpacking
     download_nltk_resources()
 
     if not os.path.exists(OUTPUT_DIR):
@@ -159,15 +177,10 @@ def main():
     )
     pred = model.predict(x_test, qid_test)
 
-    scores = {
-        k: NDCGScorer(k=k)(y_test, pred, qid_test).mean()
-        for k in (1, 2, 3, 4, 5, 10, 20)
-    }
-    for k, score in scores.items():
-        print(f"nDCG@{k}\t{score}")
+    plot_ndcg_scores(y_test, pred, qid_test)
 
     docno = load_docno(test_file, letor=False)
-    with open(RANKING_OUTPUT_FILE, "w", encoding="utf-8") as output:
+    with open(RANKING_FILE, "w", encoding="utf-8") as output:
         print_ranking(qid_test, docno, pred, output)
 
 
