@@ -57,7 +57,7 @@ def excel_to_df(excel_file):
 
 def get_train_test_df(df):
     df = df.sample(frac=1, random_state=2)
-    train_size = int(0.7 * len(df))
+    train_size = int(0.8 * len(df))
     train_set = df[:train_size].sort_values(by=["qid"])
     test_set = df[train_size:].sort_values(by=["qid"])
     return train_set, test_set
@@ -131,30 +131,31 @@ def add_ids(ids, file, train_ids, train_file, test_ids, test_file, output_dir):
     return tuple(file_info[2] for file_info in output_files.values())
 
 
-def plot_ndcg_scores(y_test, pred, qid_test, k_values=(1, 2, 3, 4, 5, 10, 20)):
+def plot_ndcg_scores(y_test, pred, qid_test, k_values=range(1, 26)):
     scores = {k: NDCGScorer(k=k)(y_test, pred, qid_test).mean() for k in k_values}
 
     df = pd.DataFrame(list(scores.items()), columns=["k", "NDCG Score"])
 
+    sns.set_theme(style="whitegrid")
     sns.lineplot(data=df, x="k", y="NDCG Score", marker="o", color="b")
 
     plt.xlabel("k")
-    plt.ylabel("NDCG Score")
-    plt.title("NDCG Scores vs Cutoff")
+    plt.ylabel("NDCG")
+    plt.title("NDCG Score vs Cutoff")
 
     plt.grid(True)
     plt.show()
 
 
-def print_ranking(qid, docno, pred, output=None):
+def print_ranking(qid, docno, pred, relevance, output=None):
     table = []
-    headers = ["qid", "docno", "rank", "score"]
+    headers = ["qid", "docno", "rank", "score", "relev"]
     if output is None:
         output = sys.stdout
     for a, b in group_offsets(qid):
         idx = np.argsort(-pred[a:b]) + a
         for rank, i in enumerate(idx, 1):
-            table.append([qid[i], docno[i], rank, round(pred[i], 3)])
+            table.append([qid[i], docno[i], rank, round(pred[i], 3), relevance[i]])
     output.write(tabulate.tabulate(table, headers, tablefmt="pretty"))
 
 
@@ -172,16 +173,19 @@ def main():
     x_train, y_train, qid_train = load_svmlight_file(train_file, query_id=True)
     x_test, y_test, qid_test = load_svmlight_file(test_file, query_id=True)
 
-    model = AdaRank(max_iter=100, estop=10, scorer=NDCGScorer(k=10)).fit(
-        x_train, y_train, qid_train
-    )
+    model = AdaRank(
+        max_iter=100,
+        estop=10,
+        scorer=NDCGScorer(k=5),
+        verbose=True,
+    ).fit(x_train, y_train, qid_train)
     pred = model.predict(x_test, qid_test)
-
-    plot_ndcg_scores(y_test, pred, qid_test)
 
     docno = load_docno(test_file, letor=False)
     with open(RANKING_FILE, "w", encoding="utf-8") as output:
-        print_ranking(qid_test, docno, pred, output)
+        print_ranking(qid_test, docno, pred, y_test, output)
+
+    plot_ndcg_scores(y_test, pred, qid_test)
 
 
 if __name__ == "__main__":
