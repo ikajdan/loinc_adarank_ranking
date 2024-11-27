@@ -6,6 +6,10 @@ This is a simple implementation of the AdaRank algorithm to rank relevant docume
 
 AdaRank is a machine learning algorithm for ranking tasks that uses boosting to optimize ranking metrics directly. It iteratively combines weak rankers to minimize errors in ranking results by assigning higher weights to misranked items. AdaRank ensures that the final model improves on metrics like NDCG (Normalized Discounted Cumulative Gain) or MAP (Mean Average Precision) rather than traditional loss functions.
 
+## Ranking
+
+This script performs text preprocessing, converts data into a format suitable for machine learning, and applies the AdaRank algorithm for learning to rank tasks. It starts by downloading necessary NLTK resources and preprocessing text data using stemming, lemmatization, and stop word removal. The input data, provided in an Excel file, is converted into a pandas DataFrame, cleaned, and split into training and test sets. The features are extracted using TF-IDF and saved as SVMLight format files. AdaRank is used to train a ranking model on the training set, and the predictions are evaluated using NDCG scores. The results are printed in a ranked table and visualized with a plot of NDCG scores across different cutoffs. The code also ensures proper file management, such as removing unnecessary files and adding document IDs to the SVMLight files.
+
 ## Performance
 
 NDCG (Normalized Discounted Cumulative Gain) is a metric used to evaluate the quality of ranked lists, such as search results or recommendation systems. It measures how well the ranked items match the ideal order of relevance, giving more weight to higher-ranked items. The score ranges from 0 to 1, where 1 indicates perfect ranking. NDCG considers both the relevance of the items and their positions in the list, rewarding models that place highly relevant items at the top and penalizing those that misplace them further down.
