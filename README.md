@@ -31,25 +31,26 @@ The provided plot shows the model's performance in ranking tasks at various cuto
 <br>
 
 ```
-1       0.4111012201813297      109     [0.38845439 0.19132288 0.18044579 0.9727727  0.21404082]        train 0.3894    valid 0.3894
-2       0.39388126294966763     73      [0.45661398 0.10477076 0.77158208 0.28404842 0.21404082]        train 0.4824    valid 0.4824
-3       0.39478803258383055     84      [0.24186627 0.67630341 0.25700953 0.31127573 0.26257811]        train 0.4819    valid 0.4819
-4       0.42771572016035403     59      [0.99147648 0.19132288 0.20292642 0.24577326 0.20732319]        train 0.5213    valid 0.5213
-5       0.3921355344911272      84      [0.24186627 0.67630341 0.25700953 0.31127573 0.26257811]        train 0.4118    valid 0.4118
-6       0.39806011628530014     73      [0.45661398 0.10477076 0.77158208 0.28404842 0.21404082]        train 0.4980    valid 0.4980
-7       0.3951792759864329      59      [0.99147648 0.19132288 0.20292642 0.24577326 0.20732319]        train 0.5123    valid 0.5123
-8       0.3968037355494283      84      [0.24186627 0.67630341 0.25700953 0.31127573 0.26257811]        train 0.4635    valid 0.4635
-9       0.374830952993401       84      [0.24186627 0.67630341 0.25700953 0.31127573 0.26257811]        train 0.4118    valid 0.4118
-10      0.39806011628530014     73      [0.45661398 0.10477076 0.77158208 0.28404842 0.21404082]        train 0.4931    valid 0.4931
-11      0.3944559963655336      59      [0.99147648 0.19132288 0.20292642 0.24577326 0.20732319]        train 0.5064    valid 0.5064
-12      0.39449280809725756     84      [0.24186627 0.67630341 0.25700953 0.31127573 0.26257811]        train 0.4118    valid 0.4118
-13      0.39806011628530014     73      [0.45661398 0.10477076 0.77158208 0.28404842 0.21404082]        train 0.4752    valid 0.4752
-14      0.3938679780649763      109     [0.38845439 0.19132288 0.18044579 0.9727727  0.21404082]        train 0.4736    valid 0.4736
+1   0.4111012201813297    109   [0.38845439 0.19132288 0.18044579 0.9727727  0.21404082]  train 0.3894  valid 0.3894
+2   0.39388126294966763   73    [0.45661398 0.10477076 0.77158208 0.28404842 0.21404082]  train 0.4824  valid 0.4824
+3   0.39478803258383055   84    [0.24186627 0.67630341 0.25700953 0.31127573 0.26257811]  train 0.4819  valid 0.4819
+4   0.42771572016035403   59    [0.99147648 0.19132288 0.20292642 0.24577326 0.20732319]  train 0.5213  valid 0.5213
+5   0.3921355344911272    84    [0.24186627 0.67630341 0.25700953 0.31127573 0.26257811]  train 0.4118  valid 0.4118
+6   0.39806011628530014   73    [0.45661398 0.10477076 0.77158208 0.28404842 0.21404082]  train 0.4980  valid 0.4980
+7   0.3951792759864329    59    [0.99147648 0.19132288 0.20292642 0.24577326 0.20732319]  train 0.5123  valid 0.5123
+8   0.3968037355494283    84    [0.24186627 0.67630341 0.25700953 0.31127573 0.26257811]  train 0.4635  valid 0.4635
+9   0.374830952993401     84    [0.24186627 0.67630341 0.25700953 0.31127573 0.26257811]  train 0.4118  valid 0.4118
+10  0.39806011628530014   73    [0.45661398 0.10477076 0.77158208 0.28404842 0.21404082]  train 0.4931  valid 0.4931
+11  0.3944559963655336    59    [0.99147648 0.19132288 0.20292642 0.24577326 0.20732319]  train 0.5064  valid 0.5064
+12  0.39449280809725756   84    [0.24186627 0.67630341 0.25700953 0.31127573 0.26257811]  train 0.4118  valid 0.4118
+13  0.39806011628530014   73    [0.45661398 0.10477076 0.77158208 0.28404842 0.21404082]  train 0.4752  valid 0.4752
+14  0.3938679780649763    109   [0.38845439 0.19132288 0.18044579 0.9727727  0.21404082]  train 0.4736  valid 0.4736
 ```
 
-The table shows the performance of a model across multiple iterations, with each row representing a different iteration. The first column indicates the iteration number, while the second column displays the model's loss for that iteration. The third column shows a feature vector, representing model parameters. The "train" and "valid" columns show the model's performance on the training and validation datasets, respectively.
+The table shows the performance of a model across multiple iterations. The first column indicates the iteration number (n_iter), followed by the weight (alpha) assigned to the selected weak ranker, the feature index (fid) of the selected ranker, its top-5 scores (score), and the mean performance on training (train) and validation (valid).
 
-Throughout the iterations, there are fluctuations in performance, with some iterations (such as iteration 4) showing improvement in both training and validation scores, while others (like iteration 5) show relatively lower values. The performance is fairly consistent between training and validation, suggesting it is not overfitting or underfitting, though some iterations indicate room for further improvement.
+The repeated selection of features like 84 and 73 across iterations highlights their consistent contribution to performance improvements, while the gradual changes in scores indicate the model's progress and convergence. The training and validation scores are equal, because no validation set is used, and the model is evaluated on the entire dataset.
+
 
 ## Setup
 
